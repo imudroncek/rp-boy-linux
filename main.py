@@ -1,16 +1,16 @@
 import pygame
 import sys
-from SH1107Emulator import SH1107
+from lib.SH1107Emulator import SH1107
 import asyncio
 import time
-from ..rp_boy.ScreensHelper import ScreensHelper
-from ..rp_boy.MainScreen import MainScreen
-from ..rp_boy.PauseScreen import PauseScreen
-from ..rp_boy.CountScreen import CountScreen
-from ..rp_boy.InvaderScreen import InvaderScreen
+from core.ScreensHelper import ScreensHelper
+from core.MainScreen import MainScreen
+from core.PauseScreen import PauseScreen
+from core.CountScreen import CountScreen
+from core.InvaderScreen import InvaderScreen
 from ExitScreen import ExitScreen
 from ButtonInput import ButtonInput
-from ..rp_boy.Menu import Menu, MenuItem
+from core.Menu import Menu, MenuItem
 
 TARGET_FPS = 30
 FRAME_TARGET = 1.0 / TARGET_FPS

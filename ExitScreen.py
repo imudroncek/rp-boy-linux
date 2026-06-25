@@ -1,6 +1,6 @@
 import pygame
 import sys
-from Screen import Screen
+from core.Screen import Screen
 
 class ExitScreen(Screen):
     
