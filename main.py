@@ -9,8 +9,10 @@ from core.PauseScreen import PauseScreen
 from core.CountScreen import CountScreen
 from core.InvaderScreen import InvaderScreen
 from ExitScreen import ExitScreen
+from core.OptionsScreen import OptionsScreen
 from ButtonInput import ButtonInput
 from core.Menu import Menu, MenuItem
+from Options import Options
 import framebuf
 
 TARGET_FPS = 25
@@ -19,8 +21,10 @@ FRAME_TARGET = 1.0 / TARGET_FPS
 async def main():
     width = 128
     height = 128
-    #display = SH1107(width=1280, height=960, scale=6, enable_mask=True, background_color=(0, 128, 0))
-    display = SH1107()
+    options = Options()
+    options.load()
+    display = SH1107(options, width=1280, height=960, scale=6)
+    #display = SH1107(options)
     canvas_buffer = bytearray(width * height // 8)
     canvas = framebuf.FrameBuffer(canvas_buffer, width, height, framebuf.MONO_VLSB)
     
@@ -29,9 +33,18 @@ async def main():
     screensHelper = ScreensHelper()
 
     buttonInput = ButtonInput()
-    mainMenu = Menu([MenuItem("Counter", screen_class=CountScreen), MenuItem("Invader", screen_class=InvaderScreen), MenuItem("Exit", screen_class=ExitScreen)])
-    mainScreen = MainScreen(width, height, display, canvas, buttonInput, screensHelper, mainMenu, "Main Menu")
+    mainScreen = MainScreen(width, height, display, canvas, buttonInput, screensHelper, "Main Menu")
     pauseScreen = PauseScreen(width, height, display, canvas, buttonInput, screensHelper, "Pause", mainScreen)
+    optionsScreen = OptionsScreen(width, height, display, canvas, buttonInput, screensHelper, options, "Options", mainScreen)
+
+    mainMenu = Menu([
+        MenuItem("Counter", screen_class=CountScreen), 
+        MenuItem("Invader", screen_class=InvaderScreen), 
+        MenuItem("Options", screen_instance=optionsScreen),
+        MenuItem("Exit", screen_class=ExitScreen)
+    ])
+
+    mainScreen.set_main_menu(mainMenu)
 
     screensHelper.set_pause_screen(pauseScreen)
 

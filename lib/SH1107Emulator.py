@@ -2,11 +2,11 @@ import pygame
 
 class SH1107:
     """Handles the physical hardware emulation, centering, scaling, and pixel-grid mask."""
-    def __init__(self, width=640, height=480, scale=3, enable_mask=True, background_color=(0, 0, 0)):
+    def __init__(self, options, width=640, height=480, scale=3):
+        self.options = options
         self.screen_w = width
         self.screen_h = height
         self.scale = scale
-        self.enable_mask = enable_mask
         
         # Fixed hardware dimensions of the SH1107
         self.canvas_size = 128
@@ -29,9 +29,15 @@ class SH1107:
         
         # Color Palette
         self.COLOR_WHITE = (255, 255, 255)
-        self.COLOR_BLACK = background_color
+        self.COLOR_BLACK = (0, 0, 0)
         
         self._pre_render_grid()
+
+    def _get_color_black(self):
+        if (self.options.green_background):
+            return (0, 128, 0)
+        else:
+            return self.COLOR_BLACK
 
     def _pre_render_grid(self):
         """Creates the physical OLED pixel-gap mask overlay once to maximize PC performance."""
@@ -42,7 +48,7 @@ class SH1107:
 
     def get_canvas(self):
         """Returns the 128x128 surface for the app to draw on."""
-        self.canvas.fill(self.COLOR_BLACK)
+        self.canvas.fill(self._get_color_black())
         return self.canvas
 
     def draw_pixel(self, x, y, active=True):
@@ -50,7 +56,7 @@ class SH1107:
         if not (0 <= x < 128 and 0 <= y < 128):
             return
         if not active:
-            self.canvas.set_at((x, y), self.COLOR_BLACK)
+            self.canvas.set_at((x, y), self._get_color_black())
             return
             
         self.canvas.set_at((x, y), self.COLOR_WHITE)
@@ -61,7 +67,7 @@ class SH1107:
         
         # Nearest-neighbor upscale to keep pixels crisp
         scaled_oled = pygame.transform.scale(self.canvas, (self.scaled_w, self.scaled_h))
-        if (self.enable_mask):
+        if (self.options.enable_mask):
             scaled_oled.blit(self.grid_mask, (0, 0)) # Drop the OLED gap mask on top
         
         self.screen.blit(scaled_oled, (self.offset_x, self.offset_y))
@@ -74,7 +80,7 @@ class SH1107:
     def fill(self, color_bit):
         """Maps MicroPython self.display.fill(0) to Pygame."""
         # 0 is Black, 1 is White (or active panel color)
-        color = self.COLOR_BLACK if color_bit == 0 else self.COLOR_WHITE
+        color = self._get_color_black() if color_bit == 0 else self.COLOR_WHITE
         self.canvas.fill(color)
 
     def show(self):
@@ -94,7 +100,7 @@ class SH1107:
 
     def _resolve_color(self, color_bit):
         if color_bit == 0:
-            return self.COLOR_BLACK
+            return self._get_color_black()
         else:
             return self.COLOR_WHITE
 
@@ -131,7 +137,7 @@ class SH1107:
             
             # 1. Instantly clear ONLY this footprint area back to your green COLOR_BLACK.
             # For a full-screen 128x128 canvas update, this acts as an instant frame clear.
-            self.canvas.fill(self.COLOR_BLACK, rect)
+            self.canvas.fill(self._get_color_black(), rect)
             
             # 2. Treat source pure black (0, 0, 0) as transparent so it doesn't 
             # overwrite your custom green background color with hardware black.
