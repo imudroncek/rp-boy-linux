@@ -25,11 +25,12 @@ class SH1107:
         # Pre-load a standard crisp monospace font to replicate the 8x8 bitmap look
         # Antialiasing is turned off later to keep it pixelated
         pygame.font.init()
-        self.font = pygame.font.SysFont("Courier", 8, bold=True)
+        self.font = pygame.font.SysFont("Courier", 7, bold=True)
         
         # Color Palette
         self.COLOR_WHITE = (255, 255, 255)
-        self.COLOR_BLACK = (0, 0, 0)
+        #self.COLOR_BLACK = (0, 0, 0)
+        self.COLOR_BLACK = (0, 128, 0)
         
         self._pre_render_grid()
 

@@ -18,7 +18,8 @@ FRAME_TARGET = 1.0 / TARGET_FPS
 async def main():
     width = 128
     height = 128
-    display = SH1107(enable_mask=True)
+    display = SH1107(width=1280, height=960, scale=6, enable_mask=True)
+    #display = SH1107(enable_mask=True)
     
     pygame.init()
   

@@ -4,12 +4,15 @@ from core.Screen import Screen
 
 class ExitScreen(Screen):
     
-    def callback():
-        pass
-    
     def _render(self):
         pygame.quit()
         sys.exit()
+
+    def _clear_dynamic_content(self):
+        pass
+
+    def _render_static_content(self):
+        pass
 
     def _a_pressed(self):
         pass
