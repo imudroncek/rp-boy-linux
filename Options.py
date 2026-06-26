@@ -2,11 +2,6 @@ import json
 import os
 from core.Menu import Menu, MenuItem
 
-try:
-    import ujson as json
-except ImportError:
-    import json
-
 class Options:
     _FILENAME = "options.json"
     _TMP_FILENAME = "options.tmp"
