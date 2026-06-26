@@ -2,7 +2,7 @@ import pygame
 
 class SH1107:
     """Handles the physical hardware emulation, centering, scaling, and pixel-grid mask."""
-    def __init__(self, width=640, height=480, scale=3, enable_mask=True):
+    def __init__(self, width=640, height=480, scale=3, enable_mask=True, background_color=(0, 0, 0)):
         self.screen_w = width
         self.screen_h = height
         self.scale = scale
@@ -29,8 +29,7 @@ class SH1107:
         
         # Color Palette
         self.COLOR_WHITE = (255, 255, 255)
-        #self.COLOR_BLACK = (0, 0, 0)
-        self.COLOR_BLACK = (0, 128, 0)
+        self.COLOR_BLACK = background_color
         
         self._pre_render_grid()
 
@@ -124,17 +123,19 @@ class SH1107:
     def blit(self, fbuf, x, y):
         """
         Maps MicroPython self.display.blit(fbuf, x, y) to Pygame.
-        Iterates over the sprite pixels to preserve your bi-color yellow/blue screen zones!
+        Optimized opaque blit running entirely in native C-code.
         """
-        # Ensure we are dealing with our mock FrameBuffer object
         if hasattr(fbuf, 'surface'):
-            for sy in range(fbuf.height):
-                for sx in range(fbuf.width):
-                    # Read the pixel from our unpacker surface
-                    pixel_color = fbuf.surface.get_at((sx, sy))
-                    
-                    # If the pixel isn't transparent, render it onto the screen
-                    if pixel_color.a > 0:
-                        # Reuses your existing unified color matrix logic
-                        self.pixel(int(x) + sx, int(y) + sy, 1)
-    # -------------------------------------------------------------
+            # Define the exact bounding box footprint of the incoming framebuffer
+            rect = pygame.Rect(int(x), int(y), fbuf.width, fbuf.height)
+            
+            # 1. Instantly clear ONLY this footprint area back to your green COLOR_BLACK.
+            # For a full-screen 128x128 canvas update, this acts as an instant frame clear.
+            self.canvas.fill(self.COLOR_BLACK, rect)
+            
+            # 2. Treat source pure black (0, 0, 0) as transparent so it doesn't 
+            # overwrite your custom green background color with hardware black.
+            fbuf.surface.set_colorkey((0, 0, 0))
+            
+            # 3. Blit the active white pixels natively at C-speed
+            self.canvas.blit(fbuf.surface, (int(x), int(y)))

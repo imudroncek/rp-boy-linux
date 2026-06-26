@@ -11,15 +11,18 @@ from core.InvaderScreen import InvaderScreen
 from ExitScreen import ExitScreen
 from ButtonInput import ButtonInput
 from core.Menu import Menu, MenuItem
+import framebuf
 
-TARGET_FPS = 30
+TARGET_FPS = 25
 FRAME_TARGET = 1.0 / TARGET_FPS
 
 async def main():
     width = 128
     height = 128
-    display = SH1107(width=1280, height=960, scale=6, enable_mask=True)
-    #display = SH1107(enable_mask=True)
+    #display = SH1107(width=1280, height=960, scale=6, enable_mask=True, background_color=(0, 128, 0))
+    display = SH1107()
+    canvas_buffer = bytearray(width * height // 8)
+    canvas = framebuf.FrameBuffer(canvas_buffer, width, height, framebuf.MONO_VLSB)
     
     pygame.init()
   
@@ -27,8 +30,8 @@ async def main():
 
     buttonInput = ButtonInput()
     mainMenu = Menu([MenuItem("Counter", screen_class=CountScreen), MenuItem("Invader", screen_class=InvaderScreen), MenuItem("Exit", screen_class=ExitScreen)])
-    mainScreen = MainScreen(width, height, display, buttonInput, screensHelper, mainMenu, "Main Menu")
-    pauseScreen = PauseScreen(width, height, display, buttonInput, screensHelper, "Pause", mainScreen)
+    mainScreen = MainScreen(width, height, display, canvas, buttonInput, screensHelper, mainMenu, "Main Menu")
+    pauseScreen = PauseScreen(width, height, display, canvas, buttonInput, screensHelper, "Pause", mainScreen)
 
     screensHelper.set_pause_screen(pauseScreen)
 
